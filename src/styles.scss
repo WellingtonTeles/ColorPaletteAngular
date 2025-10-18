@@ -1,0 +1,62 @@
+/* Global theme palette */
+
+// SCSS variables
+$color-gold-elegant: #CDAF6D;     // destaque principal — luxo, elegância 
+$color-midnight-royal: #0E1420;   // base do app — força, estabilidade 
+$color-deep-navy: #101622;        // elementos de contraste — segurança 
+$color-satin-blue: #5A7D9A;       // toque feminino, serenidade e clareza 
+$color-soft-sand: #E9E4D8;        // contraste suave, equilíbrio visual 
+$color-text-dark: #2C2C2C;        // legibilidade e força 
+$color-text-light: #9CA3AF;       // sutileza em textos secundários 
+$color-border: #E5E7EB;           // neutralidade técnica 
+$color-shadow: rgba(14, 20, 32, 0.2); // profundidade elegante
+
+// CSS variables for runtime usage
+:root {
+  --color-gold-elegant: #CDAF6D;
+  --color-midnight-royal: #0E1420;
+  --color-deep-navy: #101622;
+  --color-satin-blue: #5A7D9A;
+  --color-soft-sand: #E9E4D8;
+  --color-text-dark: #2C2C2C;
+  --color-text-light: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-shadow: rgba(14, 20, 32, 0.2);
+}
+
+/* Base app background and typography */
+html, body {
+  background: linear-gradient(135deg, var(--color-midnight-royal) 0%, var(--color-deep-navy) 100%);
+  color: var(--color-soft-sand);
+}
+
+/* Utility classes */
+.theme-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px var(--color-shadow);
+}
+
+.theme-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.theme-accent {
+  color: var(--color-gold-elegant);
+}
+
+.button-primary {
+  background: var(--color-satin-blue);
+  color: var(--color-soft-sand);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Global logo sizing as requested */
+img.app-logo,
+img.logo {
+  height: 20%;
+  width: 20%;
+}

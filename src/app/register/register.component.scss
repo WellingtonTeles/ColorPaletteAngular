@@ -1,0 +1,339 @@
+// Variáveis de cores personalizadas - Nova paleta
+$color-pearl-white: #F9F9F6;
+$color-night-blue: #1C1F3B;
+$color-serenity-blue: #5A7D9A;
+$color-text-dark: #2C3E50;
+$color-text-light: #6C757D;
+$color-text-muted: #9CA3AF;
+$color-border: #E5E7EB;
+$color-shadow: rgba(0, 0, 0, 0.1);
+
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-pearl-white;
+  padding: 2rem;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.register-card {
+  background: white;
+  border: 2px solid $color-border;
+  border-radius: 24px;
+  padding: 3rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      $color-night-blue, 
+      $color-serenity-blue, 
+      $color-night-blue);
+  }
+}
+
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  
+  .app-logo {
+    width: 60px;
+    height: 60px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 4px 8px rgba(28, 31, 59, 0.15));
+    
+    &:hover {
+      transform: scale(1.1) rotateY(10deg);
+      filter: drop-shadow(0 6px 12px rgba(28, 31, 59, 0.25));
+    }
+  }
+  
+  .app-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, $color-night-blue, $color-serenity-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 4px rgba(28, 31, 59, 0.1);
+  }
+}
+
+.register-title {
+  color: $color-night-blue;
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.register-subtitle {
+  color: $color-text-light;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: $color-text-dark;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  input {
+    background: white;
+    border: 2px solid $color-border;
+    border-radius: 12px;
+    padding: 1rem;
+    color: $color-text-dark;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-serenity-blue;
+      box-shadow: 0 0 0 3px rgba($color-serenity-blue, 0.1);
+      background: white;
+    }
+
+    &:hover {
+      border-color: $color-serenity-blue;
+    }
+  }
+}
+
+.register-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, $color-night-blue, $color-serenity-blue);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 20px rgba(28, 31, 59, 0.2);
+  margin-bottom: 24px;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(28, 31, 59, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $color-border;
+  }
+
+  span {
+    padding: 0 16px;
+    font-size: 14px;
+    color: $color-text-light;
+    font-weight: 500;
+  }
+}
+
+.social-buttons {
+  margin-bottom: 24px;
+
+  .google-button {
+    width: 100%;
+    padding: 16px;
+    background: white;
+    color: $color-text-dark;
+    border: 2px solid $color-border;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    &:hover:not(:disabled) {
+      background: #f8f9fa;
+      border-color: $color-serenity-blue;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px $color-shadow;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: $color-text-light;
+  font-size: 0.9rem;
+
+  .login-text {
+    color: $color-serenity-blue;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $color-night-blue;
+      text-decoration: underline;
+    }
+  }
+}
+
+// Mensagens de erro e sucesso
+.message-container {
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  background: rgba(220, 53, 69, 0.1);
+  border: 2px solid rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.success-message {
+  background: rgba(40, 167, 69, 0.1);
+  border: 2px solid rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  padding: 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estados de loading
+.register-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Campos desabilitados
+input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// Responsividade
+@media (max-width: 480px) {
+  .register-container {
+    padding: 1rem;
+  }
+
+  .register-card {
+    padding: 2rem;
+    border-radius: 16px;
+  }
+
+  .register-title {
+    font-size: 2rem;
+  }
+
+  .form-group input {
+    padding: 0.875rem;
+  }
+
+  .register-button {
+    padding: 0.875rem;
+    font-size: 1rem;
+  }
+}

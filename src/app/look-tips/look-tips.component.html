@@ -1,0 +1,263 @@
+<div class="look-tips-container">
+  <!-- Header com logo Vestria -->
+  <div class="header">
+    <div class="logo-section">
+      <img src="assets/vestra-logo.svg" alt="Vestria" class="logo">
+      <span class="app-name">Vestria</span>
+    </div>
+    <button class="back-button" (click)="goBack()">← Voltar</button>
+  </div>
+
+  <!-- Toast global no topo -->
+  <div *ngIf="!isLoading && !error">
+    <div *ngIf="showToast" class="toast" [ngClass]="toastType">
+      {{ toastMessage }}
+    </div>
+  </div>
+
+
+  <!-- Título da página -->
+  <div class="header">
+    <h1>Minhas Dicas de Look</h1>
+    <p>Inspirações e sugestões de estilo baseadas nas suas paletas de cores</p>
+    
+    <!-- Seção do Gerador de Look Personalizado -->
+    <div  *ngIf="userPalette && userPalette.colors && userPalette.colors.length > 0">
+      <div class="header">
+        <div class="header"><h3>Gerador de Look Personalizado</h3></div>
+        <p>Baseado na sua paleta de cores mais recente</p>
+        
+        <!-- Paleta de cores atual -->
+        <div class="current-palette">
+          <span class="palette-label">Sua paleta:</span><br>
+          <div class="color-preview">
+            <span *ngFor="let color of userPalette.colors.slice(0, 5)" 
+                  class="color-dot" 
+                  [style.background-color]="color"
+                  [title]="color">
+            </span>
+          </div>
+        </div>
+        
+        <!-- Seletor de tipo de look -->
+        <div class="form-group">
+          <label for="lookTypeSelect">Selecione o Look:</label>
+          <select id="lookTypeSelect" 
+                  [(ngModel)]="selectedLookType" 
+                  class="look-select"
+                  [disabled]="isGeneratingLook"
+                  (change)="generateSpecificLook(selectedLookType)">
+            <option value="">Escolha um tipo de look</option>
+            <option value="elegante">Clássico</option>
+            <option value="casual">Romântico</option>
+            <option value="festa">Criativo</option>
+            <option value="esportivo">Esportivo</option>
+            <option value="reuniao">Elegante</option>
+            <option value="reuniao">Dramático/Moderno</option>
+            <option value="reuniao">Sexy/Sensual</option>
+          </select>
+        </div>
+        
+        <!-- Botão para gerar look -->
+        <button class="clear-filters" 
+                (click)="generateSpecificLook(selectedLookType)"
+                [disabled]="!selectedLookType || isGeneratingLook">
+          <span *ngIf="!isGeneratingLook">
+            <i class="fas fa-magic"></i>
+            Gerar Look
+          </span>
+          <span *ngIf="isGeneratingLook" class="loading-text">
+            <i class="fas fa-spinner fa-spin"></i>
+            Trabalhando no seu look...
+          </span>
+        </button>
+        
+        <!-- Resultado do look gerado -->
+        
+      </div>
+    </div>
+    
+
+    
+    <!-- Mensagem quando não há paleta -->
+    <div class="no-palette-message" *ngIf="!userPalette || !userPalette.colors || userPalette.colors.length === 0">
+      <p>Você ainda não possui uma paleta de cores. <a routerLink="/color-palette">Clique aqui para criar uma paleta</a> analisando uma imagem.</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-section" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Carregando suas dicas de look...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-section" *ngIf="error && !isLoading">
+    <div class="error-icon">⚠️</div>
+    <h3>Ops! Algo deu errado</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadLookTips()">Tentar Novamente</button>
+  </div>
+
+  <!-- Empty state -->
+   <!--
+  <div class="empty-state" *ngIf="!isLoading && !error && lookTips.length === 0">
+    <div class="empty-icon">👗</div>
+    <h3>Nenhuma dica de look encontrada</h3>
+    <p>Crie uma paleta de cores primeiro para gerar dicas de look personalizadas!</p>
+  </div>
+  -->
+  <!-- Generated looks section -->
+  <div  *ngIf="generatedLooks.length > 0">
+    <h2>{{ selectedLookTypeTitle }} Gerado</h2>
+    <div class="header">
+      <div  *ngFor="let look of generatedLooks">
+        <div class="card-header">
+          <h3>{{ look.title }}</h3>
+          
+          <div class="look-badges">
+            <span class="style-badge">{{ look.style }}</span>
+            <span class="occasion-badge">{{ look.occasion }}</span>
+          </div>
+        </div>
+        
+        <!-- Context Selection -->
+        <div class="context-selection" *ngIf="!look.selectedContext">
+          <h4>Escolha o contexto de uso:</h4>
+          <div class="context-grid">
+            <div 
+              class="context-card" 
+              *ngFor="let context of look.contexts"
+              (click)="selectContext(look, context)">
+              <h5>{{ context.name }}</h5>
+              <p>{{ context.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Context Display -->
+        <div class="selected-context" *ngIf="look.selectedContext">
+          <div class="context-info">
+            <strong>Contexto:</strong> {{ look.selectedContext.name }}
+            <button class="clear-filters" (click)="changeContext(look)">Alterar</button>
+          </div>
+        </div>
+
+        <!-- Dicas do look: apenas texto e paleta, sem imagens -->
+         <div class="tips-section">
+           <h4>Dicas do Look</h4>
+           <div class="tips-content" *ngIf="look.data?.description || look.description" [innerHTML]="formatTextWithBoldAndColors(look.data?.description || look.description)"></div>
+           
+           
+           <div class="colors-section" *ngIf="look.colors?.length">
+             <h4>Cores do Look</h4>
+             <div class="colors-palette">
+               <div class="color-square" *ngFor="let color of look.colors" [style.background-color]="color" [title]="color"></div>
+             </div>
+           </div>
+         </div>
+        
+        <div class="look-actions" *ngIf="!look.isSaved">
+          <button class="clear-filters" (click)="saveLookAsTip(look)">💾 Salvar como Dica</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Look tips grid -->
+  
+
+  <!-- Seção de Looks Salvos -->
+  <div class="saved-looks-section" *ngIf="savedLooks.length > 0">
+    
+
+    <div class="saved-looks-grid" *ngIf="showSavedLooks">
+      <div class="saved-look-card" *ngFor="let savedLook of savedLooks">
+        <div class="saved-look-header">
+          <h3>{{ savedLook.title }}</h3>
+          <div class="saved-look-actions">
+            <button class="favorite-btn" (click)="toggleFavorite(savedLook)" 
+                    [ngClass]="{'active': savedLook.is_favorite}">
+              <i class="fas fa-heart"></i>
+            </button>
+            <button class="delete-btn" (click)="deleteSavedLook(savedLook)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="saved-look-content">
+          <p class="saved-look-description">{{ savedLook.description }}</p>
+          
+          <div class="saved-look-colors" *ngIf="savedLook.colors && savedLook.colors.length > 0">
+            <h4>Cores:</h4>
+            <div class="color-palette">
+              <div class="color-square" 
+                   *ngFor="let color of savedLook.colors" 
+                   [style.background-color]="color"
+                   [title]="color">
+              </div>
+            </div>
+          </div>
+          
+          <div class="saved-look-tags" *ngIf="savedLook.tags && savedLook.tags.length > 0">
+            <div class="tags">
+              <span class="tag" *ngFor="let tag of savedLook.tags">{{ tag }}</span>
+            </div>
+          </div>
+          
+          <div class="saved-look-meta">
+            <span class="look-type">{{ savedLook.look_type }}</span>
+            <span class="created-date">{{ formatDate(savedLook.created_at) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem quando não há looks salvos -->
+  <div class="no-saved-looks" *ngIf="savedLooks.length === 0 && !isLoading">
+    <div class="empty-state">
+      <i class="fas fa-bookmark"></i>
+      <h3>Nenhum look salvo ainda</h3>
+      <p>Gere looks personalizados e salve seus favoritos!</p>
+    </div>
+  </div>
+
+  <!-- Sanfona com todas as dicas -->
+  <div class="tips-accordion-section" *ngIf="filteredLookTips.length > 0">
+    <div class="section-header">
+      <h2><i class="fas fa-lightbulb"></i> Todas as Dicas</h2>
+    </div>
+
+    <div class="tips-filters">
+      <input type="text" class="filter-input" placeholder="Buscar dica..." [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+      <select class="filter-select" [(ngModel)]="selectedTag" (ngModelChange)="onTagChange()">
+        <option value="">Todas as tags</option>
+        <option *ngFor="let tag of availableTags" [value]="tag">{{ tag }}</option>
+      </select>
+      <button class="clear-filters" (click)="clearFilters()">Limpar</button>
+    </div>
+
+    <div class="tips-accordion">
+      <details class="accordion-item" *ngFor="let tip of filteredLookTips">
+        <summary>
+          <span class="tip-title">{{ tip.title }}</span>
+          <span class="tip-date">{{ formatDate(tip.createdAt || tip.created_at || '') }}</span>
+          <button class="delete-btn" title="Excluir dica" (click)="deleteLookTip(tip); $event.stopPropagation(); $event.preventDefault();">
+            <i class="fas fa-trash"></i>
+          </button>
+        </summary>
+        <div class="accordion-content">
+          <div class="tip-description" [innerHTML]="formatTextWithBoldAndColors(tip.description)"></div>
+          <div class="colors-palette" *ngIf="tip.colors?.length">
+            <div class="color-square" *ngFor="let color of tip.colors" [style.background-color]="color" [title]="color"></div>
+          </div>
+          <div class="tags" *ngIf="tip.tags?.length">
+            <span class="tag" *ngFor="let tag of tip.tags">{{ tag }}</span>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>

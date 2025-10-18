@@ -1,0 +1,140 @@
+<div class="incluir-foto-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-button" (click)="goBack()">
+      <span class="back-icon">←</span>
+      Voltar
+    </button>
+    <h1 class="page-title">📸 Incluir Foto</h1>
+    <p class="page-subtitle">Faça upload da sua foto pessoal</p>
+  </div>
+
+  <!-- Mensagens de Status -->
+  <div class="messages" *ngIf="errorMessage || successMessage">
+    <div class="error-message" *ngIf="errorMessage">
+      <span class="error-icon">⚠️</span>
+      {{ errorMessage }}
+    </div>
+    <div class="success-message" *ngIf="successMessage">
+      <span class="success-icon">✅</span>
+      {{ successMessage }}
+    </div>
+  </div>
+
+  <!-- Área de Upload -->
+  <div class="upload-section">
+    <!-- Zona de Drop/Upload -->
+    <div 
+      class="upload-zone"
+      [class.has-image]="selectedImage"
+      [class.uploading]="isUploading"
+      [class.success]="uploadSuccess"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="!selectedImage && openFileSelector()"
+    >
+      <!-- Input File Oculto -->
+      <input 
+        #fileInput 
+        type="file" 
+        accept="image/*" 
+        (change)="onFileSelected($event)"
+        style="display: none;"
+      >
+
+      <!-- Estado: Sem Imagem -->
+      <div class="upload-placeholder" *ngIf="!selectedImage && !isUploading">
+        <div class="upload-icon">📸</div>
+        <h3>Clique ou arraste sua foto aqui</h3>
+        <p>Formatos aceitos: JPEG, PNG, GIF, WebP</p>
+        <p>Tamanho máximo: 5MB</p>
+        <button class="select-button" (click)="openFileSelector()">
+          Selecionar Arquivo
+        </button>
+      </div>
+
+      <!-- Estado: Carregando -->
+      <div class="upload-loading" *ngIf="isUploading">
+        <div class="loading-spinner"></div>
+        <h3>Enviando imagem...</h3>
+        <p>Por favor, aguarde</p>
+      </div>
+
+      <!-- Estado: Imagem Selecionada -->
+      <div class="image-preview" *ngIf="selectedImage && !isUploading">
+        <img [src]="selectedImage" alt="Preview da imagem" class="preview-image">
+        <div class="image-overlay">
+          <button class="remove-button" (click)="removeImage()" title="Remover imagem">
+            🗑️
+          </button>
+        </div>
+      </div>
+
+      <!-- Estado: Upload Concluído -->
+      <div class="upload-success" *ngIf="uploadSuccess">
+        <div class="success-icon-large">✅</div>
+        <h3>Upload realizado com sucesso!</h3>
+        <p>Sua foto foi salva no sistema</p>
+      </div>
+    </div>
+
+    <!-- Informações da Imagem -->
+    <div class="image-info" *ngIf="selectedImage && imageInfo.name">
+      <h4>Informações da Imagem</h4>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nome:</span>
+          <span class="info-value">{{ imageInfo.name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Tamanho:</span>
+          <span class="info-value">{{ imageInfo.size }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Tipo:</span>
+          <span class="info-value">{{ imageInfo.type }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="action-buttons" *ngIf="selectedImage && !uploadSuccess">
+      <button 
+        class="upload-button"
+        [disabled]="!canUpload()"
+        (click)="uploadImage()"
+      >
+        <span *ngIf="!isUploading">📤 Enviar Foto</span>
+        <span *ngIf="isUploading">⏳ Enviando...</span>
+      </button>
+      
+      <button 
+        class="cancel-button"
+        [disabled]="isUploading"
+        (click)="removeImage()"
+      >
+        ❌ Cancelar
+      </button>
+    </div>
+
+    <!-- Botão Nova Foto (após sucesso) -->
+    <div class="action-buttons" *ngIf="uploadSuccess">
+      <button class="new-photo-button" (click)="clearSelection()">
+        📸 Enviar Nova Foto
+      </button>
+    </div>
+  </div>
+
+  <!-- Instruções -->
+  <div class="instructions">
+    <h4>📋 Instruções</h4>
+    <ul>
+      <li>Selecione uma foto clara do seu rosto</li>
+      <li>Certifique-se de que a iluminação está adequada</li>
+      <li>Evite fotos com filtros ou efeitos</li>
+      <li>A foto será usada para análises personalizadas</li>
+      <li>Seus dados são mantidos em segurança</li>
+    </ul>
+  </div>
+</div>

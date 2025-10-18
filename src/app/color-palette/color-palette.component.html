@@ -1,0 +1,171 @@
+<div class="color-palette-container">
+  <!-- Header com logo Vestria -->
+  <div class="header">
+    <div class="logo-section">
+      <img src="assets/vestra-logo.svg" alt="Vestria" class="logo">
+      <span class="app-name">Vestria</span>
+    </div>
+    <button class="back-button" (click)="goBack()">
+      ← Voltar
+    </button>
+  </div>
+
+  <!-- Loading da paleta salva -->
+  <div *ngIf="isLoadingSavedPalette" class="loading-section">
+    <div class="loading-spinner"></div>
+    <p>Carregando sua paleta salva...</p>
+  </div>
+
+  <!-- Verificando paleta existente -->
+  <div *ngIf="isCheckingPalette" class="loading-section">
+    <div class="loading-spinner"></div>
+    <p>Verificando paleta existente...</p>
+  </div>
+
+  <!-- Seção da imagem salva -->
+  
+  <div *ngIf="selectedImage && !isLoadingSavedPalette" class="saved-image-section">
+    <div class="saved-image-header">
+      <h3>Sua Imagem Salva</h3>
+      <div class="image-actions">
+        <!-- Botão "Gerar Paleta" removido conforme solicitado -->
+        <button class="update-image-btn" (click)="toggleImageUpdateSection()">
+          <i class="fas fa-edit"></i>
+          {{ showImageUpdateSection ? 'Cancelar' : 'Alterar Imagem' }}
+        </button>
+      </div>
+    </div>
+    
+    <div class="saved-image-container">
+      <img [src]="selectedImage" 
+           alt="Imagem salva" 
+           class="saved-image clickable-image" 
+           (click)="openImageUpdateModal()"
+           title="Clique para alterar a imagem">
+    </div>
+
+    <!-- Paleta de Cores Salva (logo abaixo da imagem) -->
+     <!--
+    <div *ngIf="colorPalette.length > 0" class="saved-color-palette">
+      <h4>Sua Paleta de Cores Salva</h4>
+      <div class="color-palette">
+        <div class="color-item" *ngFor="let color of colorPalette">
+          <div class="color-box" [style.background-color]="color.hex"></div>
+          <div class="color-info">
+            <div class="color-name">{{color.name}}</div>
+            <div class="color-hex">{{color.hex}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  -->
+    
+    <!-- Seção para atualizar imagem -->
+    <div *ngIf="showImageUpdateSection" class="update-image-section">
+      <h4>Selecionar Nova Imagem</h4>
+      <div class="upload-area" 
+           [class.drag-over]="isDragOver"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)"
+           (click)="triggerFileInput()">
+        <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;">
+        <div class="upload-content">
+          <i class="fas fa-cloud-upload-alt upload-icon"></i>
+          <p>Clique aqui ou arraste uma nova imagem</p>
+          <small>Formatos aceitos: JPG, PNG, WEBP (máx. 10MB)</small>
+        </div>
+      </div>
+      
+      <div class="update-actions">
+        <button class="save-update-btn" 
+                (click)="updateSavedImage()" 
+                [disabled]="isSaving || !selectedImage">
+          <i class="fas fa-save"></i>
+          {{ isSaving ? 'Salvando...' : 'Salvar Nova Imagem' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seção de Upload (apenas se não houver imagem salva) -->
+  <div class="upload-section" 
+       *ngIf="!selectedImage && !isLoadingSavedPalette"
+       (click)="triggerFileInput()"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)"
+       [class.drag-over]="isDragOver">
+    
+    <div class="upload-icon">📸</div>
+    <h2>Descubra Sua Paleta de Cores Pessoal</h2>
+    <p>Faça upload de uma <strong>foto sua</strong> para análise com ChatGPT Vision</p>
+    <small class="face-instruction">💡 <strong>Dica:</strong> Use uma foto com boa iluminação onde você esteja bem visível</small>
+    
+    <div class="upload-placeholder">
+      <span class="upload-plus">+</span>
+      <p>Clique aqui ou arraste uma imagem</p>
+      <small>Formatos aceitos: JPG, PNG, WEBP</small>
+    </div>
+    
+    <input #fileInput 
+           type="file" 
+           accept="image/*" 
+           (change)="onFileSelected($event)"
+           style="display: none;">
+  </div>
+
+  <!-- Seção de Processamento -->
+   
+  <div class="processing-section" *ngIf="isProcessing">
+    <div class="spinner"></div>
+    <h3>Analisando sua imagem...</h3>
+    <p>Analisando sua foto para criar uma paleta personalizada</p>
+  </div>
+
+  <!-- Seção de Resultados -->
+  <div class="results-section" *ngIf="selectedImage && !isProcessing && colorPalette.length > 0">
+    
+    <!-- Informação sobre salvamento automático -->
+    <div class="auto-save-info">
+      <div class="info-card">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12l2 2 4-4"></path>
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        <div class="info-text">
+          <h4>Paleta Salva Automaticamente!</h4>
+          <p>Sua paleta personalizada foi salva e as dicas de look foram geradas com base nas suas cores.</p>
+        </div>
+      </div>
+      
+      <!-- Botão para ver paletas existentes -->
+      <div class="existing-palettes-link">
+        <!-- Botão removido conforme solicitado -->
+      </div>
+    </div>
+
+
+
+
+
+    <!-- Resultado da Análise -->
+    <div class="analysis-result" *ngIf="paletteDescription">
+      <h4>Sua Paleta</h4>
+      <div class="season-info">
+        <p class="season-description">{{paletteDescription}}</p>
+      </div>
+    </div>
+
+    <!-- Paleta de Cores -->
+    <div class="color-palette">
+      <div class="color-item" *ngFor="let color of colorPalette">
+        <div class="color-box" [style.background-color]="color.hex"></div>
+        <div class="color-info">
+          <div class="color-name">{{color.name}}</div>
+          <div class="color-hex">{{color.hex}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

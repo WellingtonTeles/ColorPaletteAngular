@@ -1,0 +1,207 @@
+<div class="saved-looks-container">
+  <div class="header">
+    <div class="logo-section">
+      <img src="assets/vestra-logo.svg" alt="Vestria" class="logo">
+      <span class="app-name">Vestria</span>
+    </div>
+    <button class="back-button" (click)="goBack()">← Voltar</button>
+  </div>
+
+  <!-- Overlay de geração -->
+  <!-- Overlay de geração: aparece enquanto o batch está em andamento -->
+  <div class="generation-overlay" *ngIf="isGeneratingBatch">
+    <div class="overlay-content">
+      <div class="spinner"></div>
+      <h3 class="overlay-title">Gerando seus looks</h3>
+      <p class="overlay-subtitle">Este processo pode levar cerca de 3 minutos. Por favor, aguarde…</p>
+    </div>
+  </div>
+  
+  <!-- Banner de aviso dentro do card -->
+  <div class="generation-banner" *ngIf="generationMessage && isGeneratingBatch">
+    {{ generationMessage }}
+  </div>
+
+  <div class="page-title">
+    <h1>Meus Looks Salvos</h1>
+    <p>Visualize e gerencie seus looks salvos</p>
+  </div>
+
+  <!-- User type and generation controls -->
+  <div  *ngIf="!isLoading && !error">
+    <div class="client-image" *ngIf="clientImageSrc; else noClientImage">
+          <img [src]="clientImageSrc" alt="Imagem da cliente" />
+        </div>
+        <ng-template #noClientImage>
+          <div class="client-image placeholder">👤</div>
+        </ng-template>
+    <div class="card-header">
+      
+      <div class="client-info">
+        
+        <div class="client-type">
+          <strong>Tipo de usuário:</strong>
+          <span class="badge" [ngClass]="userType">{{ getUserTypeLabel(userType) }}</span>
+        </div>
+      </div>
+      <div *ngIf="generationMessage" class="generation-banner">{{ generationMessage }}</div>
+    </div>
+    <div class="card-body">
+      <div class="actions-row">
+        <!-- Toast insertion near top of the main section -->
+        <div  *ngIf="!isLoading && !error">
+          <div *ngIf="showToast" class="toast" [ngClass]="toastType">
+            {{ toastMessage }}
+          </div>
+        </div>
+        <!--       <button class="button" [disabled]="isGeneratingBatch || !paletteColors.length || ((userType === 'vip' || userType === 'premium') && isVipTotalExceeded())" (click)="generateLooks()">
+          Gerar Looks
+        </button>
+        -->
+ 
+      </div>
+      <div class="palette-section" *ngIf="paletteColors.length">
+        <h4>Sua Paleta de Cores</h4>
+        <div class="colors-palette">
+          <div class="color-square" *ngFor="let color of paletteColors" [style.background-color]="color" [title]="color"></div>
+        </div>
+      </div>
+      <!-- Standard: auto generation message -->
+      <div *ngIf="userType === 'standard'">
+        <p>Geraremos automaticamente 7 looks baseados na sua paleta: 2 esportivos, 3 casuais e 2 profissionais.</p>
+        <button class="back-button" [disabled]="isGeneratingBatch || !paletteColors.length" (click)="generateStandardLooksBatch()">Gerar agora</button>
+      </div>
+      <!-- VIP/Premium: custom selection -->
+      <div *ngIf="userType === 'vip' || userType === 'premium'">
+        <div class="vip-list">
+          <div class="vip-style-row vip-grid-two-cols" *ngFor="let opt of vipOptions">
+            <div class="vip-label"><label>{{ opt.label }}</label></div>
+            <div class="vip-input">
+              <input type="number" min="0" max="7" [(ngModel)]="vipSelection[opt.key].quantity" (ngModelChange)="onVipQuantityChange(opt.key)" />
+            </div>
+          </div>
+        </div>
+        <div class="vip-summary" [ngClass]="{ error: isVipTotalExceeded() }">
+          Total selecionado: {{ getVipTotal() }} / 7
+        </div>
+        <div class="vip-actions">
+          <button class="back-button" [disabled]="isGeneratingBatch || !canModifyLooks || isVipTotalExceeded()" (click)="generateVipLooksBatch()">Gerar Looks</button>
+          <span class="restriction" *ngIf="!canModifyLooks">{{ nextChangeDateText }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly planner for Premium -->
+  <div class="weekly-planner card" *ngIf="!isLoading && !error && userType === 'premium'">
+    <div class="card-header">
+      <strong>Planejamento Semanal de Looks (Premium)</strong>
+    </div>
+    <div class="card-body">
+      <div class="planner-grid">
+        <div class="planner-item" *ngFor="let day of weeklyPlan; let i = index">
+          <label>{{ day.day }}</label>
+          <select [(ngModel)]="weeklyPlan[i].lookType">
+            <option value="">Selecione...</option>
+            <option value="romantico">Estilo romântico</option>
+            <option value="classico">Estilo clássico</option>
+            <option value="casual">Estilo casual</option>
+            <option value="criativo">Estilo criativo</option>
+            <option value="dramatico_urbano">Estilo dramático urbano</option>
+            <option value="elegante">Estilo elegante</option>
+            <option value="sexy">Estilo sexy</option>
+          </select>
+        </div>
+      </div>
+      <div class="planner-actions">
+        <button class="primary" (click)="saveWeeklyPlan()">Salvar Planejamento</button>
+      </div>
+    </div>
+  </div>
+  <!-- Loading -->
+  <div class="loading-section" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Carregando seus looks salvos...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-section" *ngIf="error && !isLoading">
+    <div class="error-icon">⚠️</div>
+    <h3>Ops! Algo deu errado</h3>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="loadSavedLooks()">Tentar Novamente</button>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!isLoading && !error && savedLooks.length === 0">
+    <div class="empty-icon">👗</div>
+    <h3>Nenhum look salvo encontrado</h3>
+    <p>Gere looks personalizados e salve seus favoritos!</p>
+  </div>
+
+  <div class="saved-looks-list" *ngIf="!isLoading && !error && savedLooks.length > 0">
+    <div class="accordion">
+      <div class="accordion-item" *ngFor="let look of savedLooks">
+        <div class="accordion-header" (click)="toggleAccordion(look)">
+          <div class="header-left">
+            <div class="thumb" *ngIf="getImageSrc(look); else noThumb">
+              <img [src]="getImageSrc(look)" [alt]="look.title || 'Look salvo'" />
+            </div>
+            <ng-template #noThumb>
+              <div class="thumb placeholder">👗</div>
+            </ng-template>
+            <div class="header-text">
+              <h3 class="look-title">{{ look.title || 'Look' }}</h3>
+              <div class="meta">
+                <span class="look-type" *ngIf="look.look_type">{{ look.look_type }}</span>
+                <span class="created-date" *ngIf="look.created_at">{{ look.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="share-btn" (click)="shareSavedLook(look); $event.stopPropagation()" title="Compartilhar">
+              <i class="fas fa-share"></i>
+            </button>
+            <button class="delete-btn" (click)="deleteSavedLook(look); $event.stopPropagation()" title="Excluir">
+              <i class="fas fa-trash"></i>
+            </button>
+            <button class="toggle-btn" [ngClass]="{expanded: look.expanded}" (click)="$event.stopPropagation(); toggleAccordion(look)">
+              <i class="fas" [ngClass]="look.expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="accordion-content" *ngIf="look.expanded">
+          <div class="content-grid">
+            <div class="generated-image" *ngIf="getImageSrc(look); else noImageContent">
+              <img [src]="getImageSrc(look)" [alt]="look.title || 'Look salvo'"/>
+            </div>
+            <ng-template #noImageContent>
+              <div class="image-placeholder">
+                <i class="fas fa-image"></i>
+                <p>Sem imagem disponível</p>
+              </div>
+            </ng-template>
+            <div class="tips-section">
+              <h4>Dicas do Look</h4>
+              <div class="tips-content" [innerHTML]="formatTextWithBoldAndColors(getTipText(look))"></div>
+
+              <div class="colors-section" *ngIf="getColors(look).length">
+                <h4>Cores do Look</h4>
+                <div class="colors-palette">
+                  <div class="color-square" *ngFor="let color of getColors(look)" [style.background-color]="color" [title]="color"></div>
+                </div>
+              </div>
+
+              <div class="tags-section" *ngIf="getTags(look).length">
+                <h4>Tags</h4>
+                <div class="tags">
+                  <span class="tag" *ngFor="let tag of getTags(look)">{{ tag }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

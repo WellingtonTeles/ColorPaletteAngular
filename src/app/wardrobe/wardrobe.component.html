@@ -1,0 +1,255 @@
+<div class="wardrobe-container">
+  <div class="header">
+    <div class="logo-section">
+      <div class="logo">V</div>
+      <span class="brand">Vestria</span>
+    </div>
+    <button class="back-button" (click)="goBack()">← Voltar</button>
+  </div>
+  
+  <div class="main-content">
+    <!-- Header com título e botão de adicionar -->
+    <div class="content-header">
+      <h1>Meu Guarda-Roupa</h1>
+      <button class="add-item-btn" (click)="openAddItemModal()">
+        <i class="icon-plus">+</i>
+        Adicionar Peça
+      </button>
+    </div>
+
+    <!-- Filtros e busca -->
+    <div class="filters-section">
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Buscar peças..." 
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          class="search-input">
+        <i class="search-icon">🔍</i>
+      </div>
+      
+      <div class="filter-buttons">
+        <select [(ngModel)]="selectedCategory" (change)="onCategoryFilter()" class="filter-select">
+          <option value="">Todas as categorias</option>
+          <option *ngFor="let category of categories" [value]="category.id">
+            {{ category.display_name }}
+          </option>
+        </select>
+        
+        <select [(ngModel)]="selectedSeason" (change)="onSeasonFilter()" class="filter-select">
+          <option value="">Todas as estações</option>
+          <option value="spring">Primavera</option>
+          <option value="summer">Verão</option>
+          <option value="autumn">Outono</option>
+          <option value="winter">Inverno</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Estatísticas rápidas -->
+    <div class="stats-section" *ngIf="stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ stats.total_items }}</div>
+        <div class="stat-label">Total de Peças</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ getCategoriesCount() }}</div>
+        <div class="stat-label">Categorias</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ getSeasonsCount() }}</div>
+        <div class="stat-label">Estações</div>
+      </div>
+    </div>
+
+    <!-- Grid de itens -->
+    <div class="items-grid" *ngIf="wardrobeItems.length > 0; else emptyState">
+      <div 
+        class="item-card" 
+        *ngFor="let item of wardrobeItems"
+        (click)="viewItem(item)">
+        
+        <div class="item-image">
+          <img 
+            [src]="item.image_url || '/assets/placeholder-clothing.svg'" 
+            [alt]="item.name"
+            (error)="onImageError($event)">
+          <div class="item-overlay">
+            <button class="edit-btn" (click)="editItem(item, $event)">✏️</button>
+            <button class="delete-btn" (click)="deleteItem(item, $event)">🗑️</button>
+          </div>
+        </div>
+        
+        <div class="item-info">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <p class="item-category">{{ item.category_name }}</p>
+          <div class="item-colors">
+            <span 
+              class="color-dot" 
+              *ngFor="let color of item.colors?.slice(0, 3)"
+              [style.background-color]="color">
+            </span>
+            <span *ngIf="item.colors && item.colors.length > 3" class="more-colors">
+              +{{ item.colors.length - 3 }}
+            </span>
+          </div>
+          <div class="item-meta">
+            <span class="item-brand" *ngIf="item.brand">{{ item.brand }}</span>
+            <span class="item-season" *ngIf="item.season">{{ getSeasonLabel(item.season) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vazio -->
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <div class="empty-icon">👗</div>
+        <h2>Seu guarda-roupa está vazio</h2>
+        <p>Comece adicionando suas primeiras peças para receber dicas de look personalizadas!</p>
+        <button class="add-first-item-btn" (click)="openAddItemModal()">
+          Adicionar Primeira Peça
+        </button>
+      </div>
+    </ng-template>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Carregando seu guarda-roupa...</p>
+    </div>
+
+    <!-- Paginação -->
+    <div class="pagination" *ngIf="pagination && pagination.hasMore">
+      <button 
+        class="load-more-btn" 
+        (click)="loadMore()"
+        [disabled]="loading">
+        Carregar Mais
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal para adicionar/editar item -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingItem ? 'Editar Peça' : 'Adicionar Nova Peça' }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="saveItem()" #itemForm="ngForm" class="item-form">
+        <div class="form-group">
+          <label for="itemName">Nome da Peça *</label>
+          <input 
+            type="text" 
+            id="itemName"
+            [(ngModel)]="currentItem.name"
+            name="name"
+            required
+            class="form-input"
+            placeholder="Ex: Blusa azul listrada">
+        </div>
+
+        <div class="form-group">
+          <label for="itemCategory">Categoria *</label>
+          <select 
+            id="itemCategory"
+            [(ngModel)]="currentItem.clothing_category_id"
+            name="category"
+            required
+            class="form-select">
+            <option value="">Selecione uma categoria</option>
+            <option *ngFor="let category of categories" [value]="category.id">
+              {{ category.display_name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="itemBrand">Marca</label>
+          <input 
+            type="text" 
+            id="itemBrand"
+            [(ngModel)]="currentItem.brand"
+            name="brand"
+            class="form-input"
+            placeholder="Ex: Zara, H&M, etc.">
+        </div>
+
+        <div class="form-group">
+          <label for="itemSeason">Estação</label>
+          <select 
+            id="itemSeason"
+            [(ngModel)]="currentItem.season"
+            name="season"
+            class="form-select">
+            <option value="">Selecione uma estação</option>
+            <option value="spring">Primavera</option>
+            <option value="summer">Verão</option>
+            <option value="autumn">Outono</option>
+            <option value="winter">Inverno</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="itemColors">Cores Principais *</label>
+          <div class="colors-input">
+            <input 
+              type="text" 
+              [(ngModel)]="newColor"
+              name="newColor"
+              class="form-input"
+              placeholder="Digite uma cor (ex: #FF5733 ou azul)"
+              (keyup.enter)="addColor()">
+            <button type="button" class="add-color-btn" (click)="addColor()">Adicionar</button>
+          </div>
+          <div class="selected-colors">
+            <span 
+              class="color-tag" 
+              *ngFor="let color of currentItem.colors; let i = index">
+              <span class="color-preview" [style.background-color]="color"></span>
+              {{ color }}
+              <button type="button" (click)="removeColor(i)">×</button>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="itemDescription">Descrição</label>
+          <textarea 
+            id="itemDescription"
+            [(ngModel)]="currentItem.description"
+            name="description"
+            class="form-textarea"
+            placeholder="Descreva a peça (opcional)">
+          </textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="itemImage">URL da Imagem</label>
+          <input 
+            type="url" 
+            id="itemImage"
+            [(ngModel)]="currentItem.image_url"
+            name="image_url"
+            class="form-input"
+            placeholder="https://exemplo.com/imagem.jpg">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="save-btn"
+            [disabled]="!itemForm.valid || saving">
+            {{ saving ? 'Salvando...' : (editingItem ? 'Atualizar' : 'Adicionar') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

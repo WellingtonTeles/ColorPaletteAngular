@@ -1,0 +1,98 @@
+<div class="palette-gallery">
+  <h3 class="gallery-title" *ngIf="title">{{ title }}</h3>
+  
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Carregando paletas...</p>
+  </div>
+  
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && palettes.length === 0">
+    <div class="empty-icon">🎨</div>
+    <h4>{{ emptyMessage }}</h4>
+    <p>Ainda não há paletas públicas disponíveis. Seja o primeiro a compartilhar uma paleta!</p>
+  </div>
+  
+  <!-- Palettes Grid -->
+  <div class="palettes-grid" *ngIf="!isLoading && palettes.length > 0">
+    <div 
+      class="palette-card" 
+      *ngFor="let palette of palettes"
+      (click)="onPaletteClick(palette)"
+    >
+      <!-- Palette Header -->
+      <div class="palette-header">
+        <div class="palette-info">
+          <h4 class="palette-name">{{ palette.name }}</h4>
+          <p class="palette-author" *ngIf="palette.authorName">por {{ palette.authorName }}</p>
+        </div>
+        <div class="palette-actions" *ngIf="showActions">
+          <button 
+            class="action-button like-button"
+            [class.liked]="palette.is_liked"
+            (click)="onLikeClick(palette, $event)"
+            title="Curtir paleta"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="likes-count" *ngIf="palette.likes_count">{{ palette.likes_count }}</span>
+          </button>
+          <button 
+            class="action-button share-button"
+            (click)="onShareClick(palette, $event)"
+            title="Compartilhar paleta"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Client Face Image -->
+      <div class="client-image-section" *ngIf="palette.faceImageUrl">
+        <div class="client-image-container">
+          <img 
+            [src]="palette.faceImageUrl" 
+            alt="Imagem da cliente"
+            class="client-face-image"
+            (error)="onImageError($event)"
+          >
+          <div class="image-overlay">
+            <span class="image-label">Rosto analisado</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Color Preview -->
+      <div class="color-preview">
+        <div 
+          class="color-swatch"
+          *ngFor="let color of getColorPreview(palette.colors)"
+          [style.background-color]="color"
+          [title]="color"
+        ></div>
+        <div class="more-colors" *ngIf="palette.colors.length > 5">
+          +{{ palette.colors.length - 5 }}
+        </div>
+      </div>
+      
+      <!-- Palette Description -->
+      <p class="palette-description" *ngIf="palette.description">
+        {{ palette.description }}
+      </p>
+      
+      <!-- Palette Meta -->
+      <div class="palette-meta">
+        <span class="created-date">{{ palette.created_at | date:'dd/MM/yyyy' }}</span>
+        <span class="color-count">{{ palette.colors.length }} cores</span>
+      </div>
+    </div>
+  </div>
+</div>

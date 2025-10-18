@@ -1,0 +1,72 @@
+<div class="profile-container">
+  <div class="header">
+    <div class="logo-section">
+      <div class="logo">V</div>
+      <span class="brand">Vestria</span>
+    </div>
+    <button class="back-button" (click)="goBack()">← Voltar</button>
+  </div>
+  
+  <div class="content">
+    <h1>Perfil</h1>
+    
+    <div *ngIf="currentUser" class="user-info">
+      <h2>Informações do Usuário</h2>
+      <p><strong>Email:</strong> {{ currentUser.email }}</p>
+      <p><strong>Nome:</strong> {{ currentUser.displayName || 'Não informado' }}</p>
+      <p><strong>ID:</strong> {{ currentUser.uid }}</p>
+    </div>
+
+    <!-- Seção de Imagem do Cliente -->
+    <div class="client-image-section">
+      <h2>Foto do Perfil</h2>
+      
+      <div *ngIf="isLoadingImage" class="loading-message">
+        Carregando imagem...
+      </div>
+      
+      <div *ngIf="!isLoadingImage && hasClientImage && clientImageUrl" class="image-container">
+        <img [src]="clientImageUrl" alt="Foto do cliente" class="client-image">
+        <button class="update-photo-button" (click)="navigateToIncluirFoto()">
+          Atualizar Foto
+        </button>
+      </div>
+      
+      <div *ngIf="!isLoadingImage && !hasClientImage" class="no-image-container">
+        <div class="no-image-placeholder">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <p>Nenhuma foto encontrada</p>
+        <button class="add-photo-button" (click)="navigateToIncluirFoto()">
+          📷 Adicionar Foto
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensagens de sucesso e erro -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Seção de deletar conta -->
+    <div class="danger-zone">
+      <h2>Zona de Perigo</h2>
+      <p>Atenção: Esta ação é irreversível e deletará permanentemente sua conta e todos os dados associados.</p>
+      
+      <button 
+        class="delete-button" 
+        (click)="deleteAccount()" 
+        [disabled]="isLoading">
+        <span *ngIf="isLoading">Deletando...</span>
+        <span *ngIf="!isLoading">🗑️ Deletar Minha Conta</span>
+      </button>
+    </div>
+  </div>
+</div>
